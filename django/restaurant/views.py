@@ -9,7 +9,7 @@ from django.http import JsonResponse
 @require_http_methods(["GET"])
 def restaurant_list(request):
     return JsonResponse({
-        "restaurants": Restaurant.objects.all().values(),
+        "restaurants": list(Restaurant.objects.all().values()),
     })
 
 @require_http_methods(["POST"])
