@@ -1,9 +1,9 @@
 angular.module('app.controllers', [])
   
-.controller('searchCtrl', ['$scope', '$stateParams', 'uiGmapGoogleMapApi', // The following is the constructor function for this page's controller. See https://docs.angularjs.org/guide/controller
+.controller('searchCtrl', ['$scope', '$stateParams', 'uiGmapGoogleMapApi', '$http', // The following is the constructor function for this page's controller. See https://docs.angularjs.org/guide/controller
 // You can include any angular dependencies as parameters for this function
 // TIP: Access Route Parameters for your page via $stateParams.parameterName
-function ($scope, $stateParams, uiGmapGoogleMapApi) {
+function ($scope, $stateParams, uiGmapGoogleMapApi, $http) {
     uiGmapGoogleMapApi.then(function(maps){
         // Configuration needed to display the road-map with traffic
         // Displaying Ile-de-france (Paris neighbourhood)
@@ -31,29 +31,48 @@ function ($scope, $stateParams, uiGmapGoogleMapApi) {
                     let places = searchBox.getPlaces();
                     let result = [];
                     for (let i = 0; i < places.length; i++) {
-                        let queueLen = 10, waitTime = 10;
-                        let contentString = '<div id="content">'+
-                            '<div id="siteNotice">'+
-                            '</div>'+
-                            '<h1 style="font-size:20px;">'+places[i].name+'</h1>'+
-                            '<div id="bodyContent">'+
-                            '<p><b>Address: </b>' + places[i].formatted_address + '</p>'+
-                            '<p><b>Current Queue: </b>' + queueLen + ' Person(s)</p>'+
-                            '<p><b>Estimated Waiting: </b>' + waitTime + ' Minute(s)</p>'+
-                            '</div>';
-                        result.push({
-                            coords: {
-                                latitude: places[i].geometry.location.lat(),
-                                longitude: places[i].geometry.location.lng(),
-                            },
-                            placeId: places[i].place_id,
-                            click: (marker) => {
-                                let info = new google.maps.InfoWindow({
-                                    content: contentString,
-                                    maxWidth: 320,
-                                });
-                                info.open(Map, marker);
-                            },
+                        //let queueLen = 10, waitTime = 10;
+                        $http.get("http://ypan.me:8080/api/restaurant/fetch/?place_id=" + places[i].place_id).then((response) => {
+                            console.log(response);
+                            let contentString;
+                            if (response.data.status == 200) {
+                                queueLen = response.data.restaurant.queue_len;
+                                waitTime = response.data.restaurant.wait_time;
+                                updateTime = response.data.restaurant.update_time;
+                                contentString = '<div id="content">'+
+                                    '<div id="siteNotice">'+
+                                    '</div>'+
+                                    '<h1 style="font-size:20px;">'+places[i].name+'</h1>'+
+                                    '<div id="bodyContent">'+
+                                    '<p><b>Address: </b>' + places[i].formatted_address + '</p>'+
+                                    '<p><b>Current Queue: </b>' + queueLen + ' Person(s)</p>'+
+                                    '<p><b>Estimated Waiting: </b>' + waitTime + ' Minute(s)</p>'+
+                                    '<p><b>Updated at: </b>' + updateTime + '</p>'+
+                                    '</div>';
+                            } else {
+                                contentString = '<div id="content">'+
+                                    '<div id="siteNotice">'+
+                                    '</div>'+
+                                    '<h1 style="font-size:20px;">'+places[i].name+'</h1>'+
+                                    '<div id="bodyContent">'+
+                                    '<p><b>Address: </b>' + places[i].formatted_address + '</p>'+
+                                    '<p>No one has uploaded queue data yet.</p>'+
+                                    '</div>';
+                            }
+                            result.push({
+                                coords: {
+                                    latitude: places[i].geometry.location.lat(),
+                                    longitude: places[i].geometry.location.lng(),
+                                },
+                                placeId: places[i].place_id,
+                                click: (marker) => {
+                                    let info = new google.maps.InfoWindow({
+                                        content: contentString,
+                                        maxWidth: 320,
+                                    });
+                                    info.open(Map, marker);
+                                },
+                            });
                         });
                     }
                     $scope.places = result;
