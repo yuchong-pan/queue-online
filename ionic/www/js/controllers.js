@@ -24,21 +24,6 @@ function ($scope, $stateParams, uiGmapGoogleMapApi, $http) {
             showTraficLayer:true
         };
 
-        $scope.share = {
-            queueLen: null,
-            waitTime: null,
-        };
-
-        $scope.upload = (place_id, name, addr) => {
-            $http.post("http://ypan.me:8080/api/restaurant/upload/", {
-                place_id: place_id,
-                name: name,
-                addr: addr,
-                queue_len: $scope.share.queueLen,
-                wait_time: $scope.share.waitTime,
-            });
-        };
-
         $scope.searchbox = {
             template:'searchbox.tpl.html', 
             events:{
@@ -66,7 +51,7 @@ function ($scope, $stateParams, uiGmapGoogleMapApi, $http) {
                                     '<h3 style="font-size:17px;">Share Your Data!</h3>'+
                                     '<p><b>Current Queue: </b><input class="share" ng-model="share.queueLen"></input> Person(s)</p>'+
                                     '<p><b>Estimated Waiting: </b><input class="share" ng-model="share.waitTime"></input> Minutes(s)</p>'+
-                                    '<button class="upload" ng-click="upload(' + places[i].place_id + ',' + places[i].name + ',' + places[i].formatted_address + ')">Upload</button>'+
+                                    '<button class="upload" ng-click="upload(\'' + places[i].place_id + '\',\'' + places[i].name + '\',\'' + places[i].formatted_address + '\')">Upload</button>'+
                                     '</div>'+
                                     '</div>';
                             } else {
@@ -80,10 +65,20 @@ function ($scope, $stateParams, uiGmapGoogleMapApi, $http) {
                                     '<h3 style="font-size:17px;">Share Your Data!</h3>'+
                                     '<p><b>Current Queue: </b><input class="share" ng-model="share.queueLen"></input> Person(s)</p>'+
                                     '<p><b>Estimated Waiting: </b><input class="share" ng-model="share.waitTime"></input> Minutes(s)</p>'+
-                                    '<button class="upload" ng-click="upload(' + places[i].place_id + ',' + places[i].name + ',' + places[i].formatted_address + ')">Upload</button>'+
+                                    '<button class="upload" ng-click="upload(\'' + places[i].place_id + '\',\'' + places[i].name + '\',\'' + places[i].formatted_address + '\')">Upload</button>'+
                                     '</div>'+
                                     '</div>';
                             }
+                            let upload = function(place_id, name, addr) {
+                                console.log("uploading");
+                                $http.post("http://ypan.me:8080/api/restaurant/upload/", {
+                                    place_id: place_id,
+                                    name: name,
+                                    addr: addr,
+                                    queue_len: 10,
+                                    wait_time: 233,
+                                });
+                            };
                             result.push({
                                 coords: {
                                     latitude: places[i].geometry.location.lat(),
@@ -96,6 +91,9 @@ function ($scope, $stateParams, uiGmapGoogleMapApi, $http) {
                                         maxWidth: 320,
                                     });
                                     info.open(Map, marker);
+                                    setTimeout(1000, () => {
+                                        document.getElementsByClassName("upload")[0].addEventListener("click", () => {alert("Success Upload!");upload(places[i].place_id, places[i].name, places[i].formatted_address);});
+                                    });
                                 },
                             });
                         });
