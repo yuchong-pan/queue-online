@@ -39,17 +39,30 @@ def restaurant_add(request):
     })
 
 @require_http_methods(["POST"])
-def restaurant_update(request):
+def restaurant_upload(request):
     body = json.loads(request.body)
 
     place_id = body["place_id"]
     queue_len = body["queue_len"]
     wait_time = body["wait_time"]
+    name = body["name"]
+    addr = body["addr"]
 
-    Restaurant.objects.filter(place_id=place_id).update(
-        queue_len=queue_len,
-        wait_time=wait_time,
-    )
+    r = Restaurant.objects.filter(place_id=place_id)
+    
+    if r.count() > 0:
+        r.update(
+            queue_len=queue_len,
+            wait_time=wait_time,
+        )
+    else:
+        Restaurant.objects.create(
+            name=name,
+            addr=addr,
+            place_id=place_id,
+            queue_len=queue_len,
+            wait_time=wait_time,
+        )
 
     return JsonResponse({
         "status": 200,
