@@ -24,6 +24,21 @@ function ($scope, $stateParams, uiGmapGoogleMapApi, $http) {
             showTraficLayer:true
         };
 
+        $scope.share = {
+            queueLen: null,
+            waitTime: null,
+        };
+
+        $scope.upload = (place_id, name, addr) => {
+            $http.post("http://ypan.me:8080/api/restaurant/upload/", {
+                place_id: place_id,
+                name: name,
+                addr: addr,
+                queue_len: $scope.share.queueLen,
+                wait_time: $scope.share.waitTime,
+            });
+        };
+
         $scope.searchbox = {
             template:'searchbox.tpl.html', 
             events:{
@@ -48,6 +63,11 @@ function ($scope, $stateParams, uiGmapGoogleMapApi, $http) {
                                     '<p><b>Current Queue: </b>' + queueLen + ' Person(s)</p>'+
                                     '<p><b>Estimated Waiting: </b>' + waitTime + ' Minute(s)</p>'+
                                     '<p><b>Updated at: </b>' + updateTime + '</p>'+
+                                    '<h3 style="font-size:17px;">Share Your Data!</h3>'+
+                                    '<p><b>Current Queue: </b><input class="share" ng-model="share.queueLen"></input> Person(s)</p>'+
+                                    '<p><b>Estimated Waiting: </b><input class="share" ng-model="share.waitTime"></input> Minutes(s)</p>'+
+                                    '<button class="upload" ng-click="upload(' + places[i].place_id + ',' + places[i].name + ',' + places[i].formatted_address + ')">Upload</button>'+
+                                    '</div>'+
                                     '</div>';
                             } else {
                                 contentString = '<div id="content">'+
@@ -57,6 +77,11 @@ function ($scope, $stateParams, uiGmapGoogleMapApi, $http) {
                                     '<div id="bodyContent">'+
                                     '<p><b>Address: </b>' + places[i].formatted_address + '</p>'+
                                     '<p>No one has uploaded queue data yet.</p>'+
+                                    '<h3 style="font-size:17px;">Share Your Data!</h3>'+
+                                    '<p><b>Current Queue: </b><input class="share" ng-model="share.queueLen"></input> Person(s)</p>'+
+                                    '<p><b>Estimated Waiting: </b><input class="share" ng-model="share.waitTime"></input> Minutes(s)</p>'+
+                                    '<button class="upload" ng-click="upload(' + places[i].place_id + ',' + places[i].name + ',' + places[i].formatted_address + ')">Upload</button>'+
+                                    '</div>'+
                                     '</div>';
                             }
                             result.push({
