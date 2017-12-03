@@ -5,4 +5,5 @@ urlpatterns = [
     url(r"^list/$", restaurant_list),
     url(r"^add/$", restaurant_add),
     url(r"^update/$", restaurant_update),
+    url(r"^fetch/$", restaurant_fetch),
 ]

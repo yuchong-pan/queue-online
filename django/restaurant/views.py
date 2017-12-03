@@ -18,8 +18,6 @@ def restaurant_add(request):
 
     name = body["name"]
     addr = body["addr"]
-    city = body["city"]
-    postal_code = body["postal_code"]
     place_id = body["place_id"]
     queue_len = body["queue_len"]
     wait_time = body["wait_time"]
@@ -27,8 +25,6 @@ def restaurant_add(request):
     Restaurant.objects.create(
         name=name,
         addr=addr,
-        city=city,
-        postal_code=postal_code,
         place_id=place_id,
         queue_len=queue_len,
         wait_time=wait_time,
@@ -37,8 +33,6 @@ def restaurant_add(request):
     return JsonResponse({
         "name": name,
         "addr": addr,
-        "city": city,
-        "postal_code": postal_code,
         "place_id": place_id,
         "queue_len": queue_len,
         "wait_time": wait_time,
@@ -56,3 +50,21 @@ def restaurant_update(request):
         queue_len=queue_len,
         wait_time=wait_time,
     )
+
+    return JsonResponse({
+        "status": 200,
+    })
+
+@require_http_methods(["GET"])
+def restaurant_fetch(request):
+    place_id = request.GET["place_id"]
+    r = list(Restaurant.objects.filter(place_id=place_id).values())
+    if len(r) == 0:
+        return JsonResponse({
+            "status": 404,
+        })
+    else:
+        return JsonResponse({
+            "status": 200,
+            "restaurant": r[0],
+        })
